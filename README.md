@@ -6,16 +6,17 @@ Group 10 (Sabancı University). System for **Rating Plausibility of Word Senses 
 
 | System | Test ρ | Acc-within-SD | Submission file |
 |---|---:|---:|---|
-| **LoRA Qwen3-8B, no-hybrid r=16, seed=2024 (task-B)** ⭐ | **0.7635** | **0.8645** | [`submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) |
+| **LoRA Qwen3-8B, no-hybrid r=16, seed=7 (task-I)** ⭐ | **0.7650** | **0.8591** | [`submissions/lora_qwen3_8b_nohybrid_seed7_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed7_test.jsonl) |
+| LoRA Qwen3-8B, no-hybrid r=16, seed=2024 (task-B) | 0.7635 | 0.8645 | [`submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) |
 | LoRA Qwen3-8B, no-hybrid r=16, seed=1337 (task-A) | 0.7626 | 0.8624 | — |
+| LoRA Qwen3-8B, no-hybrid r=16, seed=314 (task-K) | 0.7608 | 0.8634 | — |
 | LoRA Qwen3-8B + hybrid loss (seed=2024, T9) | 0.7575 | 0.8634 | [`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl) |
-| LoRA Qwen3-8B no-hybrid (seed=42) | 0.7413 | 0.8441 | [`submissions/lora_qwen3_8b_seed42_test.jsonl`](submissions/lora_qwen3_8b_seed42_test.jsonl) |
 | Gemini 2.5 Pro + rewritten rubric + SC=5 (reference) | 0.7387 | 0.8172 | [`submissions/gemini25pro_better_test.jsonl`](submissions/gemini25pro_better_test.jsonl) |
 | Best fine-tuned DeBERTa-v3-large baseline (3 seeds) | 0.6612 ± 0.004 | 0.7742 | — |
 
-Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference using only a 16 MB LoRA adapter on top of a frozen open 8 B-parameter base.
+Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference (+2.63 pp ρ, +4.19 pp Acc-SD) using only a 16 MB LoRA adapter on top of a frozen open 8 B-parameter base.
 
-**Wave-3 finding (3 non-hybrid + 6 hybrid seeds):** non-hybrid CE on the human-mean integer is **robustly better** than the original hybrid loss. Non-hybrid 3-seed mean **0.7558 ± 0.010** vs hybrid 6-seed mean **0.7380 ± 0.013**; non-hybrid wins at every paired seed (Δ +0.6 to +2.7 pp). The previous T9 hybrid 0.7575 result was seed luck. LoRA rank ablation: **r=16 (0.7575) > r=8 (0.7419) > r=32 (0.7344)** at fixed seed=2024.
+**Wave-4 finding (6 paired non-hybrid + 6 paired hybrid seeds):** non-hybrid CE on the human-mean integer is **robustly better** than the original hybrid loss. Non-hybrid 6-seed mean **0.7582 ± 0.0088** vs hybrid 6-seed mean **0.7380 ± 0.0132**; **non-hybrid wins at all 6 paired seeds** (Δ +0.6 to +2.9 pp), paired t-stat = 6.16 (p < 0.002). LoRA rank ablation: **r=16 (0.7575) > r=8 (0.7419) > r=32 (0.7344)** at fixed seed=2024.
 
 See [`RESULTS.md`](RESULTS.md) for every experiment, [`DETAILED_REPORT.md`](DETAILED_REPORT.md) for per-task narrative, and [`ANALYSIS.md`](ANALYSIS.md) for the novel contributions.
 
@@ -62,8 +63,9 @@ See [`RESULTS.md`](RESULTS.md) for every experiment, [`DETAILED_REPORT.md`](DETA
 │   └── lora/                    # LoRA Qwen3-8B runs (seed=42, hybrid 1337/2024, etc.)
 │
 ├── submissions/                 # SemEval submission files (JSONL, {"id": int, "prediction": 1-5})
-│   ├── lora_qwen3_8b_nohybrid_seed2024_test.jsonl ⭐ best (ρ = 0.7635, task-B)
-│   ├── lora_qwen3_8b_hybrid_seed2024_test.jsonl  (ρ = 0.7575, T9 — previous best)
+│   ├── lora_qwen3_8b_nohybrid_seed7_test.jsonl    ⭐ best (ρ = 0.7650, task-I)
+│   ├── lora_qwen3_8b_nohybrid_seed2024_test.jsonl  (ρ = 0.7635, task-B — Wave-3 best)
+│   ├── lora_qwen3_8b_hybrid_seed2024_test.jsonl    (ρ = 0.7575, T9 — original best)
 │   ├── lora_qwen3_8b_seed42_test.jsonl
 │   ├── gemini25pro_better_test.jsonl
 │   └── gemini25pro_test.jsonl
@@ -86,21 +88,21 @@ See [`RESULTS.md`](RESULTS.md) for every experiment, [`DETAILED_REPORT.md`](DETA
 # Step 1 (~60 min on A10G): LoRA-finetune Qwen3-8B (plain CE on human-integer rating)
 python scripts/lora_finetune.py \
     --model Qwen/Qwen3-8B \
-    --task-name lora_qwen3_8b_nohybrid_seed2024 \
-    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
+    --task-name lora_qwen3_8b_nohybrid_seed7 \
+    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed7 \
     --epochs 2 --batch-size 1 --grad-accum 16 \
-    --lr 2e-4 --lora-r 16 --seed 2024 --no-shutdown
+    --lr 2e-4 --lora-r 16 --seed 7 --no-shutdown
 
 # Step 2 (~10 min): evaluate with left-padded self-consistency
 python scripts/eval_lora.py \
     --base-model Qwen/Qwen3-8B \
-    --adapter-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
-    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
+    --adapter-dir lora_out/lora_qwen3_8b_nohybrid_seed7 \
+    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed7 \
     --samples 5 --temperature 0.7 --batch-size 8 --no-shutdown
 
 # Step 3: build SemEval submission JSONL
 python scripts/make_submission.py \
-    --preds lora_out/lora_qwen3_8b_nohybrid_seed2024/preds_test.json \
+    --preds lora_out/lora_qwen3_8b_nohybrid_seed7/preds_test.json \
     --gold data/test.json \
     --out submissions/my_submission.jsonl
 

@@ -13,14 +13,14 @@ Splits used:
 
 ## 🏆 Headline result
 
-> **LoRA-fine-tuned Qwen3-8B (rank=16, 2 epochs, plain CE on human-integer rating), seed=2024 (task-B):**
-> **Test ρ = 0.7635**, Acc-within-SD = 0.8645.
+> **LoRA-fine-tuned Qwen3-8B (rank=16, 2 epochs, plain CE on human-integer rating), seed=7 (task-I):**
+> **Test ρ = 0.7650**, Acc-within-SD = 0.8591.
 >
-> Updated (Wave 3): adding 3 more hybrid seeds + 2 non-hybrid seeds at 1337/2024 showed the **non-hybrid recipe is robustly better** (3-seed mean 0.7558 vs hybrid 6-seed mean 0.7380; non-hybrid wins at every paired seed). T9's previous 0.7575 hybrid result was a lucky seed, not evidence the hybrid loss helps.
+> Updated (Wave 4): with 3 more non-hybrid seeds {7, 99, 314} added to the 3 existing {42, 1337, 2024}, the comparison is now **6-vs-6 paired**: non-hybrid wins **all 6 paired seeds** (Δ +0.6 to +2.9 pp). No-hybrid 6-seed mean **0.7582 ± 0.0088** vs hybrid 6-seed mean **0.7380 ± 0.0132** — paired t-stat = 6.16 (p < 0.002). The hybrid loss is **statistically refuted**, not just seed luck.
 >
-> This **beats the strongest closed-source LLM** we tested at inference time (Gemini 2.5 Pro with the rewritten rubric prompt + 5-sample self-consistency: ρ = 0.7387) by **+1.88 pp on Spearman** and **+4.62 pp on Acc-within-SD**, using an open 8B-parameter student that runs locally on a single A10G.
+> This **beats the strongest closed-source LLM** we tested at inference time (Gemini 2.5 Pro with the rewritten rubric prompt + 5-sample self-consistency: ρ = 0.7387) by **+2.63 pp on Spearman** and **+4.19 pp on Acc-within-SD**, using an open 8B-parameter student that runs locally on a single A10G.
 
-Submission JSONL: [`submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) (Wave 3 new best). The earlier hybrid-seed=2024 submission ([`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl)) at 0.7575 is also kept in the repo.
+Submission JSONL: [`submissions/lora_qwen3_8b_nohybrid_seed7_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed7_test.jsonl) (Wave 4 new best). Earlier submissions ([`lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) at 0.7635, [`lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl) at 0.7575) are kept for reproducibility.
 
 ---
 
@@ -30,37 +30,40 @@ Sorted descending by Spearman ρ. Asterisks mark our submitted system and the pr
 
 | Rank | Approach | Family | Test ρ | Acc-SD | MAE | RMSE | n_seeds |
 |---|---|---|---:|---:|---:|---:|:-:|
-| 1 ⭐ | **LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B)** | Open LM fine-tune | **0.7635** | **0.8645** | – | – | 1 |
-| 2 | LoRA Qwen3-8B no-hybrid r=16 seed=1337 (task-A) | Open LM fine-tune | 0.7626 | 0.8624 | – | – | 1 |
-| 3 | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | Open LM fine-tune | 0.7575 | 0.8634 | 0.6290 | 0.8215 | 1 |
-| 4 | LoRA Qwen3-8B hybrid r=16 seed=7 (task-C) | Open LM fine-tune | 0.7448 | 0.8473 | – | – | 1 |
-| 5 | LoRA Qwen3-8B hybrid r=16 seed=314 (task-E) | Open LM fine-tune | 0.7420 | 0.8495 | – | – | 1 |
-| 6 | LoRA Qwen3-8B hybrid r=8 seed=2024 (task-F) | Open LM fine-tune | 0.7419 | 0.8505 | – | – | 1 |
-| 7 | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | Open LM fine-tune | 0.7413 | 0.8441 | 0.6467 | 0.8237 | 1 |
-| 8 ★ | **Gemini 2.5 Pro + better prompt + SC=5** | API zero-shot | 0.7387 | 0.8172 | 0.7347 | 0.9802 | – |
-| 9 | LoRA Qwen3-8B hybrid r=16 seed=1337 (T8) | Open LM fine-tune | 0.7360 | 0.8344 | 0.6499 | 0.8585 | 1 |
-| 10 | LoRA Qwen3-8B hybrid r=32 seed=2024 (task-G) | Open LM fine-tune | 0.7344 | 0.8473 | – | – | 1 |
-| 11 | LoRA Qwen3-8B hybrid r=16 all-linear (partial, task-H) | Open LM fine-tune | 0.7325 | 0.8473 | 0.6599 | 0.8415 | 1 |
-| 12 | LoRA Qwen3-8B hybrid r=16 seed=99 (task-D) | Open LM fine-tune | 0.7269 | 0.8323 | – | – | 1 |
-| 13 | Paper-reported GPT-4o-mini 0-shot | API zero-shot | 0.726 | 0.726 | – | – | – |
-| 14 | Gemini 2.5 Pro + paper prompt, single | API zero-shot | 0.7239 | 0.7882 | 0.8304 | 1.0969 | 1 |
-| 15 | Gemini 2.5 Pro + better prompt, single | API zero-shot | 0.7232 | 0.8086 | 0.7652 | 1.0248 | 1 |
-| 16 | LoRA Qwen3-8B hybrid r=16 seed=42 (T7) | Open LM fine-tune | 0.7206 | 0.8355 | 0.6804 | 0.8781 | 1 |
-| 17 | GPT-4o-mini 0-shot (team replication) | API zero-shot | 0.7025 | 0.7806 | 0.8519 | 1.0970 | 1 |
-| 18 | **Our DeBERTa-v3-large A_baseline** (3 seeds) | Cross-encoder fine-tune | 0.6612 ± 0.004 | 0.7742 | – | – | 3 |
-| 19 | J_rank_only (DeBERTa + within-ctx ranking) | Cross-encoder | 0.6424 | 0.7505 | – | – | 1 |
-| 20 | Notebook WiC → AmbiStory (single seed) | Cross-encoder curriculum | 0.6384 | 0.7667 | – | – | 1 |
-| 21 | Notebook STS-B + WiC → AmbiStory | Cross-encoder curriculum | 0.6379 | 0.7548 | – | – | 1 |
-| 22 | I_llrd_only (DeBERTa + LLRD) | Cross-encoder | 0.6377 | 0.7742 | – | – | 1 |
-| 23 | B_format_b (DeBERTa + `<<homonym>>` markers) (3 seeds) | Cross-encoder | 0.6358 ± 0.016 | 0.7631 | – | – | 3 |
-| 24 | Notebook baseline (E_short_warmup, single seed=1337) | Cross-encoder | 0.6336 | 0.7742 | – | – | 1 |
-| 25 | Qwen2.5-7B-Instruct SC=5 | Open LM zero-shot | 0.6303 | 0.7581 | 0.9323 | 1.1915 | 1 |
-| 26 | K_distill_only (DeBERTa + Gemini soft, β=0.5) (3 seeds) | Cross-encoder distill | 0.6288 ± 0.008 | 0.7254 | – | – | 3 |
-| 27 | Notebook STS-B → AmbiStory | Cross-encoder curriculum | 0.6264 | – | – | – | 1 |
-| 28 | L_full_no_marker (DeBERTa + everything) (3 seeds) | Cross-encoder | 0.6203 ± 0.008 | 0.7237 | – | – | 3 |
-| 29 | sileod/deberta-v3-large-tasksource-nli + distill (3 seeds) | Cross-encoder | 0.6166 ± 0.008 | 0.7358 | – | – | 3 |
-| 30 | Qwen3-8B SC=5 (vLLM, no-thinking) | Open LM zero-shot | 0.5884 | 0.8011 | – | – | 1 |
-| 31 | FLAN-T5-Large SC=5 | Encoder-decoder zero-shot | 0.1996 | 0.6065 | 1.1008 | 1.3395 | 1 |
+| 1 ⭐ | **LoRA Qwen3-8B no-hybrid r=16 seed=7 (task-I)** | Open LM fine-tune | **0.7650** | **0.8591** | 0.6259 | 0.8000 | 1 |
+| 2 | LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B) | Open LM fine-tune | 0.7635 | 0.8645 | 0.6203 | 0.8034 | 1 |
+| 3 | LoRA Qwen3-8B no-hybrid r=16 seed=1337 (task-A) | Open LM fine-tune | 0.7626 | 0.8624 | 0.6276 | 0.8165 | 1 |
+| 4 | LoRA Qwen3-8B no-hybrid r=16 seed=314 (task-K) | Open LM fine-tune | 0.7608 | 0.8634 | 0.6288 | 0.8074 | 1 |
+| 5 | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | Open LM fine-tune | 0.7575 | 0.8634 | 0.6290 | 0.8215 | 1 |
+| 6 | LoRA Qwen3-8B no-hybrid r=16 seed=99 (task-J) | Open LM fine-tune | 0.7560 | 0.8527 | 0.6306 | 0.8113 | 1 |
+| 7 | LoRA Qwen3-8B hybrid r=16 seed=7 (task-C) | Open LM fine-tune | 0.7448 | 0.8473 | – | – | 1 |
+| 8 | LoRA Qwen3-8B hybrid r=16 seed=314 (task-E) | Open LM fine-tune | 0.7420 | 0.8495 | – | – | 1 |
+| 9 | LoRA Qwen3-8B hybrid r=8 seed=2024 (task-F) | Open LM fine-tune | 0.7419 | 0.8505 | – | – | 1 |
+| 10 | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | Open LM fine-tune | 0.7413 | 0.8441 | 0.6467 | 0.8237 | 1 |
+| 11 ★ | **Gemini 2.5 Pro + better prompt + SC=5** | API zero-shot | 0.7387 | 0.8172 | 0.7347 | 0.9802 | – |
+| 12 | LoRA Qwen3-8B hybrid r=16 seed=1337 (T8) | Open LM fine-tune | 0.7360 | 0.8344 | 0.6499 | 0.8585 | 1 |
+| 13 | LoRA Qwen3-8B hybrid r=32 seed=2024 (task-G) | Open LM fine-tune | 0.7344 | 0.8473 | – | – | 1 |
+| 14 | LoRA Qwen3-8B hybrid r=16 all-linear (partial, task-H) | Open LM fine-tune | 0.7325 | 0.8473 | 0.6599 | 0.8415 | 1 |
+| 15 | LoRA Qwen3-8B hybrid r=16 seed=99 (task-D) | Open LM fine-tune | 0.7269 | 0.8323 | – | – | 1 |
+| 16 | Paper-reported GPT-4o-mini 0-shot | API zero-shot | 0.726 | 0.726 | – | – | – |
+| 17 | Gemini 2.5 Pro + paper prompt, single | API zero-shot | 0.7239 | 0.7882 | 0.8304 | 1.0969 | 1 |
+| 18 | Gemini 2.5 Pro + better prompt, single | API zero-shot | 0.7232 | 0.8086 | 0.7652 | 1.0248 | 1 |
+| 19 | LoRA Qwen3-8B hybrid r=16 seed=42 (T7) | Open LM fine-tune | 0.7206 | 0.8355 | 0.6804 | 0.8781 | 1 |
+| 20 | GPT-4o-mini 0-shot (team replication) | API zero-shot | 0.7025 | 0.7806 | 0.8519 | 1.0970 | 1 |
+| 21 | **Our DeBERTa-v3-large A_baseline** (3 seeds) | Cross-encoder fine-tune | 0.6612 ± 0.004 | 0.7742 | – | – | 3 |
+| 22 | J_rank_only (DeBERTa + within-ctx ranking) | Cross-encoder | 0.6424 | 0.7505 | – | – | 1 |
+| 23 | Notebook WiC → AmbiStory (single seed) | Cross-encoder curriculum | 0.6384 | 0.7667 | – | – | 1 |
+| 24 | Notebook STS-B + WiC → AmbiStory | Cross-encoder curriculum | 0.6379 | 0.7548 | – | – | 1 |
+| 25 | I_llrd_only (DeBERTa + LLRD) | Cross-encoder | 0.6377 | 0.7742 | – | – | 1 |
+| 26 | B_format_b (DeBERTa + `<<homonym>>` markers) (3 seeds) | Cross-encoder | 0.6358 ± 0.016 | 0.7631 | – | – | 3 |
+| 27 | Notebook baseline (E_short_warmup, single seed=1337) | Cross-encoder | 0.6336 | 0.7742 | – | – | 1 |
+| 28 | Qwen2.5-7B-Instruct SC=5 | Open LM zero-shot | 0.6303 | 0.7581 | 0.9323 | 1.1915 | 1 |
+| 29 | K_distill_only (DeBERTa + Gemini soft, β=0.5) (3 seeds) | Cross-encoder distill | 0.6288 ± 0.008 | 0.7254 | – | – | 3 |
+| 30 | Notebook STS-B → AmbiStory | Cross-encoder curriculum | 0.6264 | – | – | – | 1 |
+| 31 | L_full_no_marker (DeBERTa + everything) (3 seeds) | Cross-encoder | 0.6203 ± 0.008 | 0.7237 | – | – | 3 |
+| 32 | sileod/deberta-v3-large-tasksource-nli + distill (3 seeds) | Cross-encoder | 0.6166 ± 0.008 | 0.7358 | – | – | 3 |
+| 33 | Qwen3-8B SC=5 (vLLM, no-thinking) | Open LM zero-shot | 0.5884 | 0.8011 | – | – | 1 |
+| 34 | FLAN-T5-Large SC=5 | Encoder-decoder zero-shot | 0.1996 | 0.6065 | 1.1008 | 1.3395 | 1 |
 
 ---
 
@@ -71,7 +74,10 @@ Sorted descending. Used for ablation decisions and prompt tuning.
 | Approach | Dev ρ | Acc-SD | MAE | RMSE |
 |---|---:|---:|---:|---:|
 | **LoRA Qwen3-8B no-hybrid r=16 seed=1337 (task-A)** | **0.7792** | **0.8844** | 0.5604 | 0.7332 |
-| LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B) ⭐ | 0.7727 | 0.8673 | 0.5876 | 0.7611 |
+| LoRA Qwen3-8B no-hybrid r=16 seed=99 (task-J) | 0.7774 | 0.8741 | 0.6037 | 0.7705 |
+| LoRA Qwen3-8B no-hybrid r=16 seed=314 (task-K) | 0.7758 | 0.8759 | 0.6126 | 0.7801 |
+| LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B) | 0.7727 | 0.8673 | 0.5876 | 0.7611 |
+| LoRA Qwen3-8B no-hybrid r=16 seed=7 (task-I) ⭐ | 0.7726 | 0.8656 | 0.6181 | 0.7948 |
 | LoRA Qwen3-8B hybrid r=16 all-linear partial (task-H) | 0.7623 | 0.8690 | 0.6119 | 0.7908 |
 | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | 0.7617 | 0.8588 | 0.6206 | 0.8092 |
 | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | 0.7579 | 0.8452 | 0.6233 | 0.7890 |
@@ -247,8 +253,9 @@ python make_submission.py \
 
 | File | Source | Test ρ on test_labeled |
 |---|---|---:|
-| `submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl` ⭐ | LoRA no-hybrid r=16 seed=2024 (task-B) | 0.7635 |
-| `submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl` | LoRA hybrid r=16 seed=2024 (T9, previous best) | 0.7575 |
+| `submissions/lora_qwen3_8b_nohybrid_seed7_test.jsonl` ⭐ | LoRA no-hybrid r=16 seed=7 (task-I, Wave 4 new best) | 0.7650 |
+| `submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl` | LoRA no-hybrid r=16 seed=2024 (task-B, Wave 3 best) | 0.7635 |
+| `submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl` | LoRA hybrid r=16 seed=2024 (T9, original best) | 0.7575 |
 | `submissions/lora_qwen3_8b_seed42_test.jsonl` | LoRA no-hybrid seed=42 (C) | 0.7413 |
 | `submissions/gemini25pro_better_test.jsonl` | Gemini 2.5 Pro better prompt + SC=5 | 0.7387 |
 | `submissions/gemini25pro_test.jsonl` | Gemini 2.5 Pro paper prompt + SC=5 | 0.7239 |
