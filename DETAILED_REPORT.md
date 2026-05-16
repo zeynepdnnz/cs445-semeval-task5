@@ -38,26 +38,27 @@ Sorted descending by Spearman ρ on `test_labeled.json`.
 | 8 ★ | Gemini 2.5 Pro + better prompt + SC=5 | 0.7387 | 0.8172 | 0.7347 | 0.9802 | – |
 | 9 | LoRA Qwen3-8B hybrid r=16 seed=1337 (T8) | 0.7360 | 0.8344 | 0.6499 | 0.8585 | 1 |
 | 10 | LoRA Qwen3-8B hybrid r=32 seed=2024 (task-G) | 0.7344 | 0.8473 | 0.6694 | 0.8734 | 1 |
-| 11 | LoRA Qwen3-8B hybrid r=16 seed=99 (task-D) | 0.7269 | 0.8323 | 0.6643 | 0.8804 | 1 |
-| 12 | Paper-reported GPT-4o-mini 0-shot | 0.726 | 0.726 | – | – | – |
-| 13 | Gemini 2.5 Pro + paper prompt, single | 0.7239 | 0.7882 | 0.8304 | 1.0969 | 1 |
-| 14 | Gemini 2.5 Pro + better prompt, single | 0.7232 | 0.8086 | 0.7652 | 1.0248 | 1 |
-| 15 | LoRA Qwen3-8B hybrid r=16 seed=42 (T7) | 0.7206 | 0.8355 | 0.6804 | 0.8781 | 1 |
-| 16 | GPT-4o-mini 0-shot (team replication) | 0.7025 | 0.7806 | 0.8519 | 1.0970 | 1 |
-| 17 | DeBERTa-v3-large A_baseline (ours, 3 seeds) | 0.6612 ± 0.004 | 0.7742 | – | – | 3 |
-| 18 | J_rank_only (DeBERTa + within-ctx ranking) | 0.6424 | 0.7505 | – | – | 1 |
-| 19 | Notebook WiC → AmbiStory | 0.6384 | 0.7667 | – | – | 1 |
-| 20 | Notebook STS-B + WiC → AmbiStory | 0.6379 | 0.7548 | – | – | 1 |
-| 21 | I_llrd_only (DeBERTa + LLRD) | 0.6377 | 0.7742 | – | – | 1 |
-| 22 | B_format_b (DeBERTa + `<<homonym>>`) | 0.6358 ± 0.016 | 0.7631 | – | – | 3 |
-| 23 | Notebook baseline E_short_warmup | 0.6336 | 0.7742 | – | – | 1 |
-| 24 | Qwen2.5-7B-Instruct SC=5 | 0.6303 | 0.7581 | 0.9323 | 1.1915 | 1 |
-| 25 | K_distill_only (DeBERTa + Gemini soft β=0.5) | 0.6288 ± 0.008 | 0.7254 | – | – | 3 |
-| 26 | Notebook STS-B → AmbiStory | 0.6264 | – | – | – | 1 |
-| 27 | L_full_no_marker (DeBERTa + all extras) | 0.6203 ± 0.008 | 0.7237 | – | – | 3 |
-| 28 | sileod-tasksource (3 seeds) | 0.6166 ± 0.008 | 0.7358 | – | – | 3 |
-| 29 | Qwen3-8B SC=5 (no thinking) | 0.5884 | 0.8011 | – | – | 1 |
-| 30 | FLAN-T5-Large SC=5 (encoder-decoder) | 0.1996 | 0.6065 | 1.1008 | 1.3395 | 1 |
+| 11 | LoRA Qwen3-8B hybrid r=16 all-linear (partial, task-H) | 0.7325 | 0.8473 | 0.6599 | 0.8415 | 1 |
+| 12 | LoRA Qwen3-8B hybrid r=16 seed=99 (task-D) | 0.7269 | 0.8323 | 0.6643 | 0.8804 | 1 |
+| 13 | Paper-reported GPT-4o-mini 0-shot | 0.726 | 0.726 | – | – | – |
+| 14 | Gemini 2.5 Pro + paper prompt, single | 0.7239 | 0.7882 | 0.8304 | 1.0969 | 1 |
+| 15 | Gemini 2.5 Pro + better prompt, single | 0.7232 | 0.8086 | 0.7652 | 1.0248 | 1 |
+| 16 | LoRA Qwen3-8B hybrid r=16 seed=42 (T7) | 0.7206 | 0.8355 | 0.6804 | 0.8781 | 1 |
+| 17 | GPT-4o-mini 0-shot (team replication) | 0.7025 | 0.7806 | 0.8519 | 1.0970 | 1 |
+| 18 | DeBERTa-v3-large A_baseline (ours, 3 seeds) | 0.6612 ± 0.004 | 0.7742 | – | – | 3 |
+| 19 | J_rank_only (DeBERTa + within-ctx ranking) | 0.6424 | 0.7505 | – | – | 1 |
+| 20 | Notebook WiC → AmbiStory | 0.6384 | 0.7667 | – | – | 1 |
+| 21 | Notebook STS-B + WiC → AmbiStory | 0.6379 | 0.7548 | – | – | 1 |
+| 22 | I_llrd_only (DeBERTa + LLRD) | 0.6377 | 0.7742 | – | – | 1 |
+| 23 | B_format_b (DeBERTa + `<<homonym>>`) | 0.6358 ± 0.016 | 0.7631 | – | – | 3 |
+| 24 | Notebook baseline E_short_warmup | 0.6336 | 0.7742 | – | – | 1 |
+| 25 | Qwen2.5-7B-Instruct SC=5 | 0.6303 | 0.7581 | 0.9323 | 1.1915 | 1 |
+| 26 | K_distill_only (DeBERTa + Gemini soft β=0.5) | 0.6288 ± 0.008 | 0.7254 | – | – | 3 |
+| 27 | Notebook STS-B → AmbiStory | 0.6264 | – | – | – | 1 |
+| 28 | L_full_no_marker (DeBERTa + all extras) | 0.6203 ± 0.008 | 0.7237 | – | – | 3 |
+| 29 | sileod-tasksource (3 seeds) | 0.6166 ± 0.008 | 0.7358 | – | – | 3 |
+| 30 | Qwen3-8B SC=5 (no thinking) | 0.5884 | 0.8011 | – | – | 1 |
+| 31 | FLAN-T5-Large SC=5 (encoder-decoder) | 0.1996 | 0.6065 | 1.1008 | 1.3395 | 1 |
 
 ### Dev set (588 examples) — selection-only metric
 
@@ -67,6 +68,7 @@ Sorted descending. Used to choose prompts and final submission.
 |---|---:|---:|
 | **LoRA Qwen3-8B no-hybrid r=16 seed=1337 (task-A)** | **0.7792** | **0.8844** |
 | LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B) ⭐ | 0.7727 | 0.8673 |
+| LoRA Qwen3-8B hybrid r=16 all-linear partial (task-H) | 0.7623 | 0.8690 |
 | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | 0.7617 | 0.8588 |
 | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | 0.7579 | 0.8452 |
 | LoRA Qwen3-8B hybrid r=8 seed=2024 (task-F) | 0.7553 | 0.8707 |
@@ -689,7 +691,7 @@ After T9 (hybrid seed=2024) gave 0.7575 — beating Gemini SC=5 — we couldn't 
 | task-G | hybrid | 2024 | 32 | q/k/v/o | 0.7344 | 0.8473 | 0.7416 |
 | task-D | hybrid | 99 | 16 | q/k/v/o | 0.7269 | 0.8323 | 0.7498 |
 | T7 | hybrid | 42 | 16 | q/k/v/o | 0.7206 | 0.8355 | 0.7477 |
-| task-H | hybrid | 2024 | 16 | **all-linear** | (eval running, see note) | – | – |
+| task-H | hybrid | 2024 | 16 | **all-linear** (partial) | 0.7325 | 0.8473 | 0.7623 |
 
 ### 7.2 Hybrid vs non-hybrid — the seed=2024 outlier explained
 
@@ -724,9 +726,20 @@ r=16 is the clear sweet spot. Both r=8 (less capacity) and r=32 (more capacity, 
 
 ### 7.4 LoRA target modules (task-H)
 
-task-H used `target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]` (attn + MLP, "all-linear"). The result: **OOM during training**. The adapter is ~175 MB (vs ~15 MB for attn-only at r=16), and the activation memory through the MLP LoRA layers blew past A10G's 24 GB at bs=1 + grad-accum=16 + grad_checkpointing.
+task-H used `target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]` (attn + MLP, "all-linear"). The result: **OOM during training** after ~1.2 epochs. The adapter is ~175 MB (vs ~15 MB for attn-only at r=16), and the activation memory through the MLP LoRA layers blew past A10G's 24 GB at bs=1 + grad-accum=16 + grad_checkpointing. The partial-training adapter was saved before crash.
 
-The partial adapter saved before OOM is being evaluated separately; result will be appended when available. We expect it to be inconclusive since training did not complete a full epoch.
+Evaluating that partial adapter with the same left-padded SC=5 recipe:
+
+| Metric | Dev | Test |
+|---|---:|---:|
+| Spearman ρ | **0.7623** | 0.7325 |
+| Acc-within-SD | **0.8690** | 0.8473 |
+| MAE | 0.6119 | 0.6599 |
+| RMSE | 0.7908 | 0.8415 |
+
+**Observation: pathological dev/test gap.** Task-H's dev ρ (0.7623) is higher than every other Wave-3 run *except* task-A — but its test ρ (0.7325) is lower than 9 of the 11 other LoRA runs. The dev-test correlation that holds for every attn-only run breaks for the partial all-linear adapter. Two confounded causes: (1) training stopped mid-2nd-epoch so the all-linear capacity was not fully exploited, (2) MLP LoRA adapters with 11× the parameters memorize dev-test-style examples faster than they generalize.
+
+**Conclusion:** all-linear LoRA at r=16 needs either a larger GPU (40 GB A100) for a full 2-epoch run, or a smaller rank (r=8) and we drop A10G OOM risk. We cannot conclude from this single partial run that all-linear is worse than attn-only — only that the partial all-linear adapter is not a competitive submission and that picking by dev would have hurt us here (dev-best is task-A 0.7792 → test 0.7626; dev-best-after-A is task-H 0.7623 → test 0.7325; the dev signal contradicts itself once you cross adapter families).
 
 ### 7.5 New best submission
 
