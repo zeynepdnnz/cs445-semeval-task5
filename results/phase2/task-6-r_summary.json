@@ -1,0 +1,31 @@
+{
+  "test_spearman_mean": 0.605591038386815,
+  "test_spearman_std": 0.0,
+  "test_acc_within_sd_mean": 0.7344086021505376,
+  "test_acc_within_sd_std": 0.0,
+  "per_seed": [
+    {
+      "seed": 2024,
+      "dev_spearman": 0.6584644430455608,
+      "test_spearman": 0.605591038386815,
+      "test_mae": 0.8589270114898682,
+      "test_rmse": 1.1172282695770264,
+      "test_acc_within_sd": 0.7344086021505376
+    }
+  ],
+  "config": {
+    "alpha": 0.8,
+    "beta": 0.2,
+    "gamma": 0.3,
+    "margin": 0.3,
+    "sigma_weighting": true,
+    "mark_homonym": false,
+    "base_lr": 1e-05,
+    "head_lr": 0.0001,
+    "llrd_decay": 0.9,
+    "epochs": 5,
+    "batch_size": 8,
+    "warmup_ratio": 0.06,
+    "weight_decay": 0.01
+  }
+}
