@@ -161,6 +161,8 @@ def main():
     p.add_argument("--hybrid", action="store_true", help="Augment dataset with Gemini integer targets")
     p.add_argument("--no-shutdown", action="store_true")
     p.add_argument("--task-name", default="lora", help="Tag for logs/output")
+    p.add_argument("--target-modules", default="q_proj,k_proj,v_proj,o_proj",
+                   help="Comma-separated LoRA target module names. Use 'all_linear' shorthand for attn+MLP.")
     args = p.parse_args()
 
     torch.manual_seed(args.seed)
@@ -178,10 +180,12 @@ def main():
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
 
+    tm = args.target_modules
+    target_modules = "all-linear" if tm == "all_linear" else [t.strip() for t in tm.split(",") if t.strip()]
     lora_cfg = LoraConfig(
         r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
         bias="none", task_type="CAUSAL_LM",
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        target_modules=target_modules,
     )
     model = get_peft_model(model, lora_cfg)
     model.print_trainable_parameters()
