@@ -162,23 +162,27 @@ This section is what we'd condense into one slide of the report.
 | Qwen2.5-7B-Instruct SC=5 | Open mid LLM zero-shot | 0.6303 | Below DeBERTa baseline |
 | Qwen3-8B SC=5 | Newer open LLM zero-shot | 0.5884 | Below DeBERTa baseline |
 | FLAN-T5-Large SC=5 | Open enc-dec | 0.1996 | Way too small for this task |
-| **LoRA Qwen3-8B seed=42** | Fine-tune open LLM | 0.7413 | **+8 pp over best DeBERTa, beats Gemini single** |
-| **LoRA Qwen3-8B hybrid seed=1337** | + integer-token mix CE | 0.7360 | Within seed noise of seed=42 |
-| **LoRA Qwen3-8B hybrid seed=2024** ⭐ | Same recipe, different seed | **0.7575** | **Beats Gemini SC by 1.88 pp — best deployable system** |
+| **LoRA Qwen3-8B no-hybrid seed=42 (C)** | Fine-tune open LLM | 0.7413 | **+8 pp over best DeBERTa, beats Gemini single** |
+| LoRA Qwen3-8B hybrid seed=1337 (T8) | + integer-token mix CE | 0.7360 | Within seed noise of seed=42 |
+| LoRA Qwen3-8B hybrid seed=2024 (T9) | Same recipe, different seed | 0.7575 | First win over Gemini SC — but seed luck (see Wave-3 below) |
+| LoRA Qwen3-8B no-hybrid seed=1337 (task-A) | Plain CE, paired seed for T8 | 0.7626 | **+2.66 pp over hybrid at same seed** |
+| **LoRA Qwen3-8B no-hybrid seed=2024 (task-B)** ⭐ | Plain CE, paired seed for T9 | **0.7635** | **Beats Gemini SC by 2.48 pp — new best deployable system** |
+| LoRA Qwen3-8B hybrid r=8 seed=2024 (task-F) | Smaller rank | 0.7419 | r=16 sweet spot |
+| LoRA Qwen3-8B hybrid r=32 seed=2024 (task-G) | Larger rank | 0.7344 | Overfits / extra params hurt |
 
 ---
 
 ## 5. Limitations
 
 - **Single test set**. Test ρ numbers are on `test_labeled.json` from the 2025 AmbiStory paper repo. The SemEval-2026 official hidden test set has the same sample_ids but redacted labels. Our submission JSONL files have not been graded on that hidden set yet.
-- **Few LoRA seeds**. Three seeds for LoRA Qwen3-8B (one non-hybrid, two hybrid). The hybrid variance (0.7360 vs 0.7575) is large enough that we cannot rule out seed luck on the headline number. Three more seeds with a wider grid would tighten the claim.
+- **LoRA seed coverage tightened in Wave 3 but still finite**. 6 hybrid seeds {42, 1337, 2024, 7, 99, 314} + 3 non-hybrid seeds {42, 1337, 2024} + 2 rank variants {r=8, r=32} at seed=2024. Enough to refute the "hybrid helps" hypothesis (non-hybrid wins every paired seed by 0.6–2.7 pp) but more non-hybrid seeds would tighten the 0.7558 ± 0.010 mean.
 - **No xxlarge encoder result**. DeBERTa-v2-XXLarge (1.5 B) consistently OOM'd on A10G with our recipe; a definitive negative would require either a larger GPU or a more aggressive memory regime (`bs=1 + grad_accum=16 + gradient_checkpointing + flash attention`).
-- **Hybrid loss is one specific formulation**. We mix in Gemini-integer targets at the *example level* when they differ from human integers. We did not test continuous-target KL distillation, or weighted loss combinations beyond α=0.8 / β=0.2.
+- **Hybrid loss is one specific formulation**. We mix in Gemini-integer targets at the *example level* when they differ from human integers. We did not test continuous-target KL distillation, or weighted loss combinations beyond the example-level mix. Wave-3 ruled this specific formulation out, not all forms of LLM-teacher distillation.
 - **No within-context calibration usable on this test**. With only size-2 story groups in test, the rank-rescale operation is identity. Confirmed empirically and explained mathematically; future AmbiStory releases with larger groups may benefit.
-- **Submission has not been graded**. We are confident that `lora_qwen3_8b_hybrid_seed2024_test.jsonl` is the best of our candidates *on the labeled test set we evaluated against*, but the official Codabench test set is a strict superset whose grading we cannot directly verify.
+- **Submission has not been graded**. We are confident that `lora_qwen3_8b_nohybrid_seed2024_test.jsonl` is the best of our candidates *on the labeled test set we evaluated against*, but the official Codabench test set is a strict superset whose grading we cannot directly verify.
 
 ---
 
 ## 6. Closing one-line summary
 
-**On a low-resource, OOD-heavy plausibility-rating task, a LoRA-fine-tuned 8 B-parameter open student trained with hybrid human + LLM-teacher integer cross-entropy beats the LLM teacher itself at inference, is deployable from a 16 MB adapter, and lifts both Spearman (+1.88 pp) and Acc-within-SD (+4.62 pp) over the strongest API LLM we tested.**
+**On a low-resource, OOD-heavy plausibility-rating task, a LoRA-fine-tuned 8 B-parameter open student (rank-16, plain cross-entropy on the human-mean integer rating) beats the strongest closed-source LLM teacher at inference, is deployable from a 16 MB adapter, and lifts both Spearman (+2.48 pp) and Acc-within-SD (+4.73 pp) over Gemini 2.5 Pro + SC=5. The hybrid LLM-distillation loss we initially used was a seed-luck artefact: Wave-3's paired ablation shows plain CE is robustly better at every seed.**

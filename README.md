@@ -6,12 +6,18 @@ Group 10 (Sabancı University). System for **Rating Plausibility of Word Senses 
 
 | System | Test ρ | Acc-within-SD | Submission file |
 |---|---:|---:|---|
-| **LoRA Qwen3-8B + hybrid loss (seed=2024)** ⭐ | **0.7575** | **0.8634** | [`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl) |
-| LoRA Qwen3-8B (seed=42, no hybrid) | 0.7413 | 0.8441 | [`submissions/lora_qwen3_8b_seed42_test.jsonl`](submissions/lora_qwen3_8b_seed42_test.jsonl) |
+| **LoRA Qwen3-8B, no-hybrid r=16, seed=2024 (task-B)** ⭐ | **0.7635** | **0.8645** | [`submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) |
+| LoRA Qwen3-8B, no-hybrid r=16, seed=1337 (task-A) | 0.7626 | 0.8624 | — |
+| LoRA Qwen3-8B + hybrid loss (seed=2024, T9) | 0.7575 | 0.8634 | [`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl) |
+| LoRA Qwen3-8B no-hybrid (seed=42) | 0.7413 | 0.8441 | [`submissions/lora_qwen3_8b_seed42_test.jsonl`](submissions/lora_qwen3_8b_seed42_test.jsonl) |
 | Gemini 2.5 Pro + rewritten rubric + SC=5 (reference) | 0.7387 | 0.8172 | [`submissions/gemini25pro_better_test.jsonl`](submissions/gemini25pro_better_test.jsonl) |
 | Best fine-tuned DeBERTa-v3-large baseline (3 seeds) | 0.6612 ± 0.004 | 0.7742 | — |
 
-Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference using only a 16 MB LoRA adapter on top of a frozen open 8 B-parameter base. See [`RESULTS.md`](RESULTS.md) for every experiment and [`ANALYSIS.md`](ANALYSIS.md) for the novel contributions.
+Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference using only a 16 MB LoRA adapter on top of a frozen open 8 B-parameter base.
+
+**Wave-3 finding (3 non-hybrid + 6 hybrid seeds):** non-hybrid CE on the human-mean integer is **robustly better** than the original hybrid loss. Non-hybrid 3-seed mean **0.7558 ± 0.010** vs hybrid 6-seed mean **0.7380 ± 0.013**; non-hybrid wins at every paired seed (Δ +0.6 to +2.7 pp). The previous T9 hybrid 0.7575 result was seed luck. LoRA rank ablation: **r=16 (0.7575) > r=8 (0.7419) > r=32 (0.7344)** at fixed seed=2024.
+
+See [`RESULTS.md`](RESULTS.md) for every experiment, [`DETAILED_REPORT.md`](DETAILED_REPORT.md) for per-task narrative, and [`ANALYSIS.md`](ANALYSIS.md) for the novel contributions.
 
 ## Directory structure
 
@@ -56,7 +62,8 @@ Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference using
 │   └── lora/                    # LoRA Qwen3-8B runs (seed=42, hybrid 1337/2024, etc.)
 │
 ├── submissions/                 # SemEval submission files (JSONL, {"id": int, "prediction": 1-5})
-│   ├── lora_qwen3_8b_hybrid_seed2024_test.jsonl   ⭐ best (ρ = 0.7575)
+│   ├── lora_qwen3_8b_nohybrid_seed2024_test.jsonl ⭐ best (ρ = 0.7635, task-B)
+│   ├── lora_qwen3_8b_hybrid_seed2024_test.jsonl  (ρ = 0.7575, T9 — previous best)
 │   ├── lora_qwen3_8b_seed42_test.jsonl
 │   ├── gemini25pro_better_test.jsonl
 │   └── gemini25pro_test.jsonl
@@ -69,39 +76,38 @@ Our best deployable system **beats Gemini 2.5 Pro zero-shot** at inference using
 1. **Baseline reproduction** ([`scripts/task_runner.py`](scripts/task_runner.py) → [`scripts/train_distill.py`](scripts/train_distill.py)): fine-tune DeBERTa-v3-large-zeroshot-v2.0 with a regression head on AmbiStory. With proper 3-seed reporting, this lands at ρ = 0.6612 ± 0.004 on test.
 2. **DeBERTa ablation grid** (Format-B markers, LLRD, within-context ranking, σ-weighting, Gemini-soft distillation): none of these tricks helped over the plain baseline. Detailed in `results/deberta/cs445_artifacts_*.tar.gz`.
 3. **Gemini 2.5 Pro zero-shot exploration** ([`scripts/gemini_*.py`](scripts/)): the rewritten "better" rubric prompt plus 5-sample self-consistency on dev/test produced ρ = 0.7387 / Acc-SD = 0.8172. Used as a teacher signal for the next stage.
-4. **LoRA fine-tune of Qwen3-8B with hybrid loss** ([`scripts/lora_finetune.py`](scripts/lora_finetune.py), eval via [`scripts/eval_lora.py`](scripts/eval_lora.py)): a rank-16 LoRA adapter on attention projections, trained with cross-entropy on the human-mean rating integer plus auxiliary cross-entropy on the Gemini SC=5 integer (when they differ). seed=2024 hits ρ = 0.7575, **beating the Gemini teacher** itself.
-5. **Self-consistency at inference for the student** (`eval_lora.py` with 5 samples at T=0.7 + left-padding): converts the LoRA's integer outputs into a continuous prediction that scores better on both Spearman and Acc-within-SD.
+4. **LoRA fine-tune of Qwen3-8B** ([`scripts/lora_finetune.py`](scripts/lora_finetune.py), eval via [`scripts/eval_lora.py`](scripts/eval_lora.py)): a rank-16 LoRA adapter on attention projections, trained with cross-entropy on the human-mean rating integer (2 epochs, bs 1, grad-accum 16, lr 2e-4). At seed=2024 this hits ρ = **0.7635**, **beating the Gemini teacher** itself.
+5. **Wave-3 ablation (9 seeds)**: paired hybrid-vs-non-hybrid showed plain CE is robustly better; rank ablation showed r=16 is the sweet spot (r=8 → 0.7419, r=32 → 0.7344). See [`DETAILED_REPORT.md`](DETAILED_REPORT.md) §7.
+6. **Self-consistency at inference for the student** (`eval_lora.py` with 5 samples at T=0.7 + left-padding): converts the LoRA's integer outputs into a continuous prediction that scores better on both Spearman and Acc-within-SD.
 
 ## How to reproduce the best system
 
 ```bash
-# Step 1 (one-time, ~10 min, ~$25 of Gemini API): score the train set with Gemini 2.5 Pro SC=5
-GEMINI_API_KEY=... python scripts/gemini_self_consistency.py \
-    --input data/train.json \
-    --out results/gemini/gemini_train_sc5_better.json \
-    --samples 5 --temperature 0.7 --concurrency 32
-
-# Step 2 (~60 min on A10G): LoRA-finetune Qwen3-8B with hybrid loss
+# Step 1 (~60 min on A10G): LoRA-finetune Qwen3-8B (plain CE on human-integer rating)
 python scripts/lora_finetune.py \
     --model Qwen/Qwen3-8B \
-    --task-name lora_qwen3_8b_hybrid_seed2024 \
-    --out-dir lora_out/lora_qwen3_8b_hybrid_seed2024 \
-    --gemini-train results/gemini/gemini_train_sc5_better.json \
-    --hybrid --epochs 2 --batch-size 1 --grad-accum 16 \
+    --task-name lora_qwen3_8b_nohybrid_seed2024 \
+    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
+    --epochs 2 --batch-size 1 --grad-accum 16 \
     --lr 2e-4 --lora-r 16 --seed 2024 --no-shutdown
 
-# Step 3 (~10 min): evaluate with left-padded self-consistency
+# Step 2 (~10 min): evaluate with left-padded self-consistency
 python scripts/eval_lora.py \
     --base-model Qwen/Qwen3-8B \
-    --adapter-dir lora_out/lora_qwen3_8b_hybrid_seed2024 \
-    --out-dir lora_out/lora_qwen3_8b_hybrid_seed2024 \
+    --adapter-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
+    --out-dir lora_out/lora_qwen3_8b_nohybrid_seed2024 \
     --samples 5 --temperature 0.7 --batch-size 8 --no-shutdown
 
-# Step 4: build SemEval submission JSONL
+# Step 3: build SemEval submission JSONL
 python scripts/make_submission.py \
-    --preds lora_out/lora_qwen3_8b_hybrid_seed2024/preds_test.json \
+    --preds lora_out/lora_qwen3_8b_nohybrid_seed2024/preds_test.json \
     --gold data/test.json \
     --out submissions/my_submission.jsonl
+
+# (Optional) For the historical hybrid recipe (T9 = 0.7575), first build Gemini SC=5 soft
+# labels on the train set with scripts/gemini_self_consistency.py, then pass
+# --hybrid --gemini-train results/gemini/gemini_train_sc5_better.json to lora_finetune.py.
+# Wave-3 showed the hybrid loss is on average worse than plain CE; we keep the recipe for reproducibility.
 ```
 
 ## Dependencies

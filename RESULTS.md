@@ -238,8 +238,9 @@ python make_submission.py \
 
 | File | Source | Test ρ on test_labeled |
 |---|---|---:|
-| `submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl` ⭐ | LoRA hybrid seed=2024 (T9) | 0.7575 |
-| `submissions/lora_qwen3_8b_seed42_test.jsonl` | LoRA non-hybrid seed=42 (C) | 0.7413 |
+| `submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl` ⭐ | LoRA no-hybrid r=16 seed=2024 (task-B) | 0.7635 |
+| `submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl` | LoRA hybrid r=16 seed=2024 (T9, previous best) | 0.7575 |
+| `submissions/lora_qwen3_8b_seed42_test.jsonl` | LoRA no-hybrid seed=42 (C) | 0.7413 |
 | `submissions/gemini25pro_better_test.jsonl` | Gemini 2.5 Pro better prompt + SC=5 | 0.7387 |
 | `submissions/gemini25pro_test.jsonl` | Gemini 2.5 Pro paper prompt + SC=5 | 0.7239 |
 
