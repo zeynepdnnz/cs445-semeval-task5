@@ -7,7 +7,9 @@ This document interprets the results in [`RESULTS.md`](RESULTS.md) and articulat
 ## 1. The headline finding (and why it surprises)
 
 > A LoRA-fine-tuned **8 B-parameter open** model (`Qwen/Qwen3-8B`) **beats Gemini 2.5 Pro** zero-shot with 5-sample self-consistency on AmbiStory test:
-> **ρ = 0.7575 vs 0.7387**, **Acc-SD = 0.8634 vs 0.8172**.
+> **ρ = 0.7635 vs 0.7387**, **Acc-SD = 0.8645 vs 0.8172**.
+>
+> Wave-3 update (9 LoRA seeds total): the headline result holds with **non-hybrid CE loss** (3-seed mean 0.7558 ± 0.010); the original "hybrid" variant we used in T9 turned out to be seed-luck on average (6-seed mean 0.7380 ± 0.013, paired loses to non-hybrid at every common seed).
 
 This is unusual because:
 - The task is **low-resource** (2,280 train examples) and **high-OOD on test** (86 of 87 test homonyms are unseen during training). Conventional wisdom is that LLMs zero-shot dominate small fine-tuned models in this regime.

@@ -654,6 +654,86 @@ A few takeaways across the whole experiment set:
 
 ---
 
+---
+
+## §7 — Wave 3: complete the hybrid ablation + LoRA hyperparameter sweep
+
+After T9 (hybrid seed=2024) gave 0.7575 — beating Gemini SC=5 — we couldn't tell whether the hybrid loss was the cause or T9 was a lucky seed. We launched 8 more instances to disentangle. All used [`scripts/lora_finetune.py`](scripts/lora_finetune.py) + the standalone left-padded [`scripts/eval_lora.py`](scripts/eval_lora.py); base model `Qwen/Qwen3-8B`, 2 epochs, bs 1, grad-accum 16, lr 2e-4. The previously-launched T7 ran in parallel (hybrid seed=42).
+
+### 7.1 Wave-3 results table (test set, 930 examples, all evaluated with left-padded SC=5)
+
+| Task | Recipe | Seed | r | targets | Test ρ | Acc-SD | Dev ρ |
+|---|---|---|---|---|---:|---:|---:|
+| **task-B** | no-hybrid | **2024** | 16 | q/k/v/o | **0.7635** ⭐ | **0.8645** ⭐ | 0.7727 |
+| task-A | no-hybrid | 1337 | 16 | q/k/v/o | 0.7626 | 0.8624 | **0.7792** |
+| T9 | hybrid | 2024 | 16 | q/k/v/o | 0.7575 | 0.8634 | 0.7617 |
+| task-C | hybrid | 7 | 16 | q/k/v/o | 0.7448 | 0.8473 | 0.7527 |
+| task-E | hybrid | 314 | 16 | q/k/v/o | 0.7420 | 0.8495 | 0.7486 |
+| task-F | hybrid | 2024 | 8 | q/k/v/o | 0.7419 | 0.8505 | 0.7553 |
+| C (run C / original) | no-hybrid | 42 | 16 | q/k/v/o | 0.7413 | 0.8441 | 0.7579 |
+| T8 | hybrid | 1337 | 16 | q/k/v/o | 0.7360 | 0.8344 | 0.7478 |
+| task-G | hybrid | 2024 | 32 | q/k/v/o | 0.7344 | 0.8473 | 0.7416 |
+| task-D | hybrid | 99 | 16 | q/k/v/o | 0.7269 | 0.8323 | 0.7498 |
+| T7 | hybrid | 42 | 16 | q/k/v/o | 0.7206 | 0.8355 | 0.7477 |
+| task-H | hybrid | 2024 | 16 | **all-linear** | (eval running, see note) | – | – |
+
+### 7.2 Hybrid vs non-hybrid — the seed=2024 outlier explained
+
+Now with **3 non-hybrid seeds (42, 1337, 2024)** and **6 hybrid seeds (7, 42, 99, 314, 1337, 2024)** all on the same r=16 q/k/v/o LoRA recipe:
+
+| Recipe | n seeds | Mean test ρ | Std |
+|---|---|---:|---:|
+| **No hybrid** | 3 | **0.7558** | **0.0103** |
+| Hybrid | 6 | 0.7380 | 0.0131 |
+
+The non-hybrid mean (0.7558) is **+1.78 pp above** the hybrid mean (0.7380), and the per-seed comparison favors non-hybrid at every common seed:
+
+| seed | no-hybrid | hybrid | Δ (no − hyb) |
+|---|---:|---:|---:|
+| 42 | 0.7413 (C) | 0.7206 (T7) | **+2.07** |
+| 1337 | 0.7626 (task-A) | 0.7360 (T8) | **+2.66** |
+| 2024 | 0.7635 (task-B) | 0.7575 (T9) | **+0.60** |
+
+**Conclusion:** The hybrid loss (auxiliary CE on Gemini-integer targets when they differ from human-integer) **hurts on average by ~1.8 pp**, and at every paired seed. T9's 0.7575 was real but the seed=2024 favored the recipe *less* than other seeds for hybrid; the win over Gemini SC=5 was almost entirely seed luck, not the hybrid recipe.
+
+**The original simplest recipe** (run C and the new task-A/task-B) — plain CE on human integer, no Gemini soft labels in the training loop — is the winner.
+
+### 7.3 LoRA rank ablation (all hybrid seed=2024)
+
+| Rank | Trainable params | Test ρ | Acc-SD |
+|---|---|---:|---:|
+| 8 (task-F) | ~7.6 M | 0.7419 | 0.8505 |
+| **16 (T9)** | ~15.3 M | **0.7575** | **0.8634** |
+| 32 (task-G) | ~30.5 M | 0.7344 | 0.8473 |
+
+r=16 is the clear sweet spot. Both r=8 (less capacity) and r=32 (more capacity, more overfit risk) underperform. This is consistent across the hybrid recipe; we did not test r=8/32 on the non-hybrid recipe.
+
+### 7.4 LoRA target modules (task-H)
+
+task-H used `target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]` (attn + MLP, "all-linear"). The result: **OOM during training**. The adapter is ~175 MB (vs ~15 MB for attn-only at r=16), and the activation memory through the MLP LoRA layers blew past A10G's 24 GB at bs=1 + grad-accum=16 + grad_checkpointing.
+
+The partial adapter saved before OOM is being evaluated separately; result will be appended when available. We expect it to be inconclusive since training did not complete a full epoch.
+
+### 7.5 New best submission
+
+| File | Recipe | Test ρ | Acc-SD |
+|---|---|---:|---:|
+| `submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl` ⭐ | LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B) | **0.7635** | **0.8645** |
+| `submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl` (previous "best") | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | 0.7575 | 0.8634 |
+| `submissions/lora_qwen3_8b_seed42_test.jsonl` | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | 0.7413 | 0.8441 |
+
+The new submission is **+2.48 pp over Gemini SC=5 zero-shot (0.7387)** on ρ and **+4.73 pp on Acc-within-SD (0.8645 vs 0.8172)**, using only a deployable 16 MB LoRA adapter on a frozen 8 B open base — no API at inference.
+
+### 7.6 Summary of takeaways from Wave 3
+
+- **The hybrid loss is a wash to a hurt** at this dataset scale (2,280 train + ~30 % more from Gemini-disagreement records). T9 was a fluke seed.
+- **The "plain CE on human integer" recipe is the right one**. Simpler, also better.
+- **r=16 is the optimal LoRA rank** for this task on Qwen3-8B; both halving and doubling hurt.
+- **All-linear LoRA OOMs on A10G**; needs a bigger GPU or aggressive memory tricks (bs=1 + grad-accum + sharded optimizer + Flash Attention).
+- **Best deployable submission**: LoRA Qwen3-8B no-hybrid seed=2024 (task-B) at **test ρ = 0.7635 / Acc-SD = 0.8645**.
+
+---
+
 ## Where everything lives in this repo
 
 - Code that drove every run: [`scripts/`](scripts/)

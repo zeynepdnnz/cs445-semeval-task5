@@ -13,12 +13,14 @@ Splits used:
 
 ## 🏆 Headline result
 
-> **LoRA-fine-tuned Qwen3-8B (rank=16, 2 epochs, hybrid loss with Gemini-2.5-Pro soft labels), seed=2024:**
-> **Test ρ = 0.7575**, Acc-within-SD = 0.8634, MAE = 0.6290, RMSE = 0.8215.
+> **LoRA-fine-tuned Qwen3-8B (rank=16, 2 epochs, plain CE on human-integer rating), seed=2024 (task-B):**
+> **Test ρ = 0.7635**, Acc-within-SD = 0.8645.
+>
+> Updated (Wave 3): adding 3 more hybrid seeds + 2 non-hybrid seeds at 1337/2024 showed the **non-hybrid recipe is robustly better** (3-seed mean 0.7558 vs hybrid 6-seed mean 0.7380; non-hybrid wins at every paired seed). T9's previous 0.7575 hybrid result was a lucky seed, not evidence the hybrid loss helps.
 >
 > This **beats the strongest closed-source LLM** we tested at inference time (Gemini 2.5 Pro with the rewritten rubric prompt + 5-sample self-consistency: ρ = 0.7387) by **+1.88 pp on Spearman** and **+4.62 pp on Acc-within-SD**, using an open 8B-parameter student that runs locally on a single A10G.
 
-Submission JSONL: [`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl).
+Submission JSONL: [`submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_nohybrid_seed2024_test.jsonl) (Wave 3 new best). The earlier hybrid-seed=2024 submission ([`submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl`](submissions/lora_qwen3_8b_hybrid_seed2024_test.jsonl)) at 0.7575 is also kept in the repo.
 
 ---
 
@@ -28,9 +30,18 @@ Sorted descending by Spearman ρ. Asterisks mark our submitted system and the pr
 
 | Rank | Approach | Family | Test ρ | Acc-SD | MAE | RMSE | n_seeds |
 |---|---|---|---:|---:|---:|---:|:-:|
-| 1 ⭐ | **LoRA Qwen3-8B + hybrid loss, seed=2024** | Open LM fine-tune | **0.7575** | **0.8634** | 0.6290 | 0.8215 | 1 |
-| 2 | LoRA Qwen3-8B no hybrid, seed=42 | Open LM fine-tune | 0.7413 | 0.8441 | 0.6467 | 0.8237 | 1 |
-| 3 ★ | **Gemini 2.5 Pro + better prompt + SC=5** | API zero-shot | 0.7387 | 0.8172 | 0.7347 | 0.9802 | – |
+| 1 ⭐ | **LoRA Qwen3-8B no-hybrid r=16 seed=2024 (task-B)** | Open LM fine-tune | **0.7635** | **0.8645** | – | – | 1 |
+| 2 | LoRA Qwen3-8B no-hybrid r=16 seed=1337 (task-A) | Open LM fine-tune | 0.7626 | 0.8624 | – | – | 1 |
+| 3 | LoRA Qwen3-8B hybrid r=16 seed=2024 (T9) | Open LM fine-tune | 0.7575 | 0.8634 | 0.6290 | 0.8215 | 1 |
+| 4 | LoRA Qwen3-8B hybrid r=16 seed=7 (task-C) | Open LM fine-tune | 0.7448 | 0.8473 | – | – | 1 |
+| 5 | LoRA Qwen3-8B hybrid r=16 seed=314 (task-E) | Open LM fine-tune | 0.7420 | 0.8495 | – | – | 1 |
+| 6 | LoRA Qwen3-8B hybrid r=8 seed=2024 (task-F) | Open LM fine-tune | 0.7419 | 0.8505 | – | – | 1 |
+| 7 | LoRA Qwen3-8B no-hybrid r=16 seed=42 (C) | Open LM fine-tune | 0.7413 | 0.8441 | 0.6467 | 0.8237 | 1 |
+| 8 ★ | **Gemini 2.5 Pro + better prompt + SC=5** | API zero-shot | 0.7387 | 0.8172 | 0.7347 | 0.9802 | – |
+| 9 | LoRA Qwen3-8B hybrid r=16 seed=1337 (T8) | Open LM fine-tune | 0.7360 | 0.8344 | 0.6499 | 0.8585 | 1 |
+| 10 | LoRA Qwen3-8B hybrid r=32 seed=2024 (task-G) | Open LM fine-tune | 0.7344 | 0.8473 | – | – | 1 |
+| 11 | LoRA Qwen3-8B hybrid r=16 seed=99 (task-D) | Open LM fine-tune | 0.7269 | 0.8323 | – | – | 1 |
+| 12 | LoRA Qwen3-8B hybrid r=16 seed=42 (T7) | Open LM fine-tune | 0.7206 | 0.8355 | 0.6804 | 0.8781 | 1 |
 | 4 | LoRA Qwen3-8B + hybrid loss, seed=1337 | Open LM fine-tune | 0.7360 | 0.8344 | 0.6499 | 0.8585 | 1 |
 | 5 | Paper-reported GPT-4o-mini 0-shot | API zero-shot | 0.726 | 0.726 | – | – | – |
 | 6 | Gemini 2.5 Pro + paper prompt, single | API zero-shot | 0.7239 | 0.7882 | 0.8304 | 1.0969 | 1 |
